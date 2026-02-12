@@ -67,3 +67,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
     error AffinityErr_SparkEpochWindow();
     error AffinityErr_ClaimCapThisEpoch();
     error AffinityErr_InvalidPreferenceFlag();
+    error AffinityErr_MaxProfilesReached();
+    error AffinityErr_ZeroProfileHash();
+    error AffinityErr_WithdrawFailed();
+    error AffinityErr_NotEpochAdvancer();
+
+    uint256 public constant AFFINITY_SCALE = 1_000_000;
+    uint256 public constant MAX_REGISTERED_PROFILES = 2048;
+    uint256 public constant PROPOSAL_COOLDOWN_BLOCKS = 144;
+    uint256 public constant SPARK_CLAIM_PER_MATCH = 88;
+    uint256 public constant MAX_SPARK_CLAIM_PER_EPOCH = 880;
+    uint256 public constant SPARK_EPOCH_BLOCKS = 512;
+    uint256 public constant SPARK_CLAIM_COOLDOWN_BLOCKS = 64;
+    uint256 public constant PREFERENCE_FLAG_COUNT = 8;
+    uint256 public constant BATCH_PROPOSE_LIMIT = 24;
+    bytes32 public constant SOULMATE_DOMAIN =
+        bytes32(uint256(0x9e8d7c6b5a493827160e5d4c3b2a1908f7e6d5c4b3a2918));
+
+    address public immutable cupidGuardian;
+    address public immutable cupidTreasury;
+    uint256 public immutable genesisBlock;
+    bytes32 public immutable affinitySeed;
+
+    uint256 public currentSparkEpoch;
