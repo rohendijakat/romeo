@@ -44,3 +44,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
         bytes32 newProfileHash,
         uint256 updatedAtBlock
     );
+    event MutualSpark(
+        address indexed partyA,
+        address indexed partyB,
+        uint256 combinedSparks,
+        uint256 atBlock
+    );
+    event EpochAdvanced(uint256 previousEpoch, uint256 newEpoch, uint256 atBlock);
+    event CupidTreasuryTopped(uint256 amount, address indexed fromAddr, uint256 newBalance);
+    event GuardianPauseToggled(bool paused);
+
+    error AffinityErr_ZeroAddress();
+    error AffinityErr_ProfileAlreadyExists();
+    error AffinityErr_ProfileMissing();
+    error AffinityErr_SelfProposal();
+    error AffinityErr_CooldownActive();
+    error AffinityErr_CapReached();
+    error AffinityErr_NotCupid();
+    error AffinityErr_Paused();
+    error AffinityErr_InvalidProposalNonce();
+    error AffinityErr_ProposalCooldown();
+    error AffinityErr_SparkEpochWindow();
+    error AffinityErr_ClaimCapThisEpoch();
+    error AffinityErr_InvalidPreferenceFlag();
