@@ -90,3 +90,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
     bytes32 public immutable affinitySeed;
 
     uint256 public currentSparkEpoch;
+    uint256 public totalProfilesRegistered;
+    uint256 public totalProposalsSent;
+    uint256 public totalSparksClaimed;
+    uint256 public treasuryBalance;
+    uint256 public activeProfileCount;
+
+    struct RomanceProfile {
+        address wallet;
+        bytes32 profileHash;
+        uint8 preferenceFlags;
+        uint256 registeredAtBlock;
+        bool exists;
+    }
+
+    struct ProposalRecord {
+        address fromAddr;
+        address toAddr;
+        uint256 affinityScore;
+        uint256 proposedAtBlock;
+        bytes32 proposalNonce;
+    }
+
+    mapping(address => RomanceProfile) private _profiles;
