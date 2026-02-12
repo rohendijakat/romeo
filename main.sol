@@ -21,3 +21,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
         uint256 proposedAtBlock,
         bytes32 proposalNonce
     );
+    event SparkIgnited(
+        address indexed recipient,
+        uint256 amount,
+        uint256 epochIndex,
+        uint256 ignitedAtBlock
+    );
+    event CompatibilityRevealed(
+        address indexed seeker,
+        address indexed target,
+        uint256 score,
+        uint256 revealedAtBlock
+    );
+    event ProfileRegistered(
+        address indexed user,
+        bytes32 profileHash,
+        uint8 preferenceFlags,
+        uint256 registeredAtBlock
+    );
+    event ProfileUpdated(
+        address indexed user,
+        bytes32 newProfileHash,
+        uint256 updatedAtBlock
+    );
