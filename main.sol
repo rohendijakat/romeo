@@ -113,3 +113,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
     }
 
     mapping(address => RomanceProfile) private _profiles;
+    mapping(address => uint256) public sparkBalance;
+    mapping(address => uint256) private _lastProposalBlock;
+    mapping(address => uint256) private _lastSparkClaimBlock;
+    mapping(address => uint256) private _sparksClaimedThisEpoch;
+    mapping(bytes32 => bool) public proposalNonceUsed;
+    mapping(uint256 => bool) private _epochAdvanced;
+    address[] private _profileList;
+    ProposalRecord[] private _proposalHistory;
+
+    modifier onlyCupid() {
+        if (msg.sender != cupidGuardian) revert AffinityErr_NotCupid();
+        _;
+    }
+
+    modifier whenNotPaused() {
+        if (paused()) revert AffinityErr_Paused();
+        _;
+    }
+
+    modifier onlyEpochAdvancer() {
+        if (msg.sender != cupidGuardian && msg.sender != cupidTreasury) revert AffinityErr_NotEpochAdvancer();
+        _;
+    }
