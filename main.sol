@@ -159,3 +159,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
 
         p.wallet = msg.sender;
         p.profileHash = profileHash;
+        p.preferenceFlags = preferenceFlags;
+        p.registeredAtBlock = block.number;
+        p.exists = true;
+        _profileList.push(msg.sender);
+        activeProfileCount++;
+        totalProfilesRegistered++;
+        emit ProfileRegistered(msg.sender, profileHash, preferenceFlags, block.number);
+    }
+
+    function updateProfile(bytes32 newProfileHash) external whenNotPaused {
+        if (newProfileHash == bytes32(0)) revert AffinityErr_ZeroProfileHash();
+        RomanceProfile storage p = _profiles[msg.sender];
+        if (!p.exists) revert AffinityErr_ProfileMissing();
+        p.profileHash = newProfileHash;
+        emit ProfileUpdated(msg.sender, newProfileHash, block.number);
+    }
+
+    function _computeAffinity(address seeker, address target) internal view returns (uint256) {
+        RomanceProfile storage sp = _profiles[seeker];
+        RomanceProfile storage tp = _profiles[target];
+        if (!sp.exists || !tp.exists) return 0;
+        uint256 xorFlags = uint256(sp.preferenceFlags ^ tp.preferenceFlags);
+        uint256 matchBits = 0;
