@@ -205,3 +205,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
         if (!toProfile.exists) revert AffinityErr_ProfileMissing();
 
         affinityScore = _computeAffinity(msg.sender, toAddr);
+        proposalNonceUsed[proposalNonce] = true;
+        _lastProposalBlock[msg.sender] = block.number;
+        totalProposalsSent++;
+
+        _proposalHistory.push(ProposalRecord({
+            fromAddr: msg.sender,
+            toAddr: toAddr,
+            affinityScore: affinityScore,
+            proposedAtBlock: block.number,
+            proposalNonce: proposalNonce
+        }));
+
+        emit SoulmateProposed(msg.sender, toAddr, affinityScore, block.number, proposalNonce);
+        emit CompatibilityRevealed(msg.sender, toAddr, affinityScore, block.number);
+        return affinityScore;
+    }
+
+    function proposeSoulmateBatch(
+        address[] calldata targets,
+        bytes32[] calldata nonces
+    ) external whenNotPaused nonReentrant {
+        uint256 n = targets.length;
+        if (n == 0 || n > BATCH_PROPOSE_LIMIT) revert AffinityErr_CapReached();
