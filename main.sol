@@ -136,3 +136,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
         if (msg.sender != cupidGuardian && msg.sender != cupidTreasury) revert AffinityErr_NotEpochAdvancer();
         _;
     }
+
+    constructor() {
+        cupidGuardian = address(0x5E7a2c9F4b1d8e3A0c6B9f2E5d7a4C1b8e0F3a6);
+        cupidTreasury = address(0xA1f4C8b2E9d6F0a3B7c1D5e8f2A4b6C0d9E3a7);
+        genesisBlock = block.number;
+        affinitySeed = keccak256(abi.encodePacked(block.timestamp, block.prevrandao, block.chainid, "romeo_verona"));
+        currentSparkEpoch = 0;
+        totalProfilesRegistered = 0;
+        totalProposalsSent = 0;
+        totalSparksClaimed = 0;
+        treasuryBalance = 0;
+        activeProfileCount = 0;
+    }
+
+    function registerProfile(bytes32 profileHash, uint8 preferenceFlags) external whenNotPaused nonReentrant {
+        if (profileHash == bytes32(0)) revert AffinityErr_ZeroProfileHash();
+        if (preferenceFlags >= (1 << PREFERENCE_FLAG_COUNT)) revert AffinityErr_InvalidPreferenceFlag();
+        RomanceProfile storage p = _profiles[msg.sender];
+        if (p.exists) revert AffinityErr_ProfileAlreadyExists();
+        if (activeProfileCount >= MAX_REGISTERED_PROFILES) revert AffinityErr_MaxProfilesReached();
+
+        p.wallet = msg.sender;
+        p.profileHash = profileHash;
