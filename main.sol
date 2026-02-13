@@ -182,3 +182,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
         if (!sp.exists || !tp.exists) return 0;
         uint256 xorFlags = uint256(sp.preferenceFlags ^ tp.preferenceFlags);
         uint256 matchBits = 0;
+        for (uint256 i = 0; i < PREFERENCE_FLAG_COUNT; i++) {
+            if ((xorFlags & (1 << i)) == 0) matchBits++;
+        }
+        uint256 base = (matchBits * AFFINITY_SCALE) / PREFERENCE_FLAG_COUNT;
+        uint256 mix = uint256(keccak256(abi.encodePacked(affinitySeed, seeker, target, block.number - genesisBlock))) % 200001;
+        uint256 bonus = (mix * AFFINITY_SCALE) / 200000;
+        uint256 score = base + (bonus % (AFFINITY_SCALE - base + 1));
+        if (score > AFFINITY_SCALE) score = AFFINITY_SCALE;
+        return score;
+    }
+
+    function proposeSoulmate(address toAddr, bytes32 proposalNonce) external whenNotPaused nonReentrant returns (uint256 affinityScore) {
+        if (toAddr == address(0)) revert AffinityErr_ZeroAddress();
+        if (toAddr == msg.sender) revert AffinityErr_SelfProposal();
+        if (proposalNonce == bytes32(0) || proposalNonceUsed[proposalNonce]) revert AffinityErr_InvalidProposalNonce();
+        if (block.number < _lastProposalBlock[msg.sender] + PROPOSAL_COOLDOWN_BLOCKS) revert AffinityErr_ProposalCooldown();
+
+        RomanceProfile storage fromProfile = _profiles[msg.sender];
+        RomanceProfile storage toProfile = _profiles[toAddr];
+        if (!fromProfile.exists) revert AffinityErr_ProfileMissing();
+        if (!toProfile.exists) revert AffinityErr_ProfileMissing();
+
+        affinityScore = _computeAffinity(msg.sender, toAddr);
