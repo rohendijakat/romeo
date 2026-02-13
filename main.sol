@@ -274,3 +274,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
             _lastSparkClaimBlock[msg.sender] = block.number;
             emit SparkIgnited(msg.sender, claim, currentSparkEpoch, block.number);
         }
+    }
+
+    function _advanceSparkEpochIfNeeded() private {
+        uint256 epochFromGenesis = (block.number - genesisBlock) / SPARK_EPOCH_BLOCKS;
+        if (epochFromGenesis > currentSparkEpoch && !_epochAdvanced[epochFromGenesis]) {
+            uint256 prev = currentSparkEpoch;
+            currentSparkEpoch = epochFromGenesis;
+            _epochAdvanced[epochFromGenesis] = true;
+            emit EpochAdvanced(prev, currentSparkEpoch, block.number);
+        }
+    }
+
+    function advanceSparkEpoch() external onlyEpochAdvancer whenNotPaused {
+        uint256 epochFromGenesis = (block.number - genesisBlock) / SPARK_EPOCH_BLOCKS;
+        if (epochFromGenesis <= currentSparkEpoch) revert AffinityErr_SparkEpochWindow();
+        uint256 prev = currentSparkEpoch;
+        currentSparkEpoch = epochFromGenesis;
+        _epochAdvanced[epochFromGenesis] = true;
+        emit EpochAdvanced(prev, currentSparkEpoch, block.number);
+    }
+
+    function topTreasury() external payable whenNotPaused {
+        if (msg.value == 0) return;
