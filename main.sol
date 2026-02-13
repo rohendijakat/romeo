@@ -251,3 +251,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
                 proposalNonce: nonce
             }));
             emit SoulmateProposed(msg.sender, toAddr, score, block.number, nonce);
+            emit CompatibilityRevealed(msg.sender, toAddr, score, block.number);
+        }
+        _lastProposalBlock[msg.sender] = block.number;
+        totalProposalsSent += n;
+    }
+
+    function claimSparksAfterProposal() external whenNotPaused nonReentrant {
+        _advanceSparkEpochIfNeeded();
+        uint256 claim = SPARK_CLAIM_PER_MATCH;
+        uint256 already = _sparksClaimedThisEpoch[msg.sender];
+        if (already + claim > MAX_SPARK_CLAIM_PER_EPOCH) {
+            claim = already >= MAX_SPARK_CLAIM_PER_EPOCH ? 0 : MAX_SPARK_CLAIM_PER_EPOCH - already;
+        }
+        if (block.number < _lastSparkClaimBlock[msg.sender] + SPARK_CLAIM_COOLDOWN_BLOCKS && already > 0) {
+            claim = 0;
+        }
+        if (claim > 0) {
+            sparkBalance[msg.sender] += claim;
+            totalSparksClaimed += claim;
+            _sparksClaimedThisEpoch[msg.sender] += claim;
+            _lastSparkClaimBlock[msg.sender] = block.number;
+            emit SparkIgnited(msg.sender, claim, currentSparkEpoch, block.number);
+        }
