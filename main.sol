@@ -297,3 +297,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
 
     function topTreasury() external payable whenNotPaused {
         if (msg.value == 0) return;
+        treasuryBalance += msg.value;
+        emit CupidTreasuryTopped(msg.value, msg.sender, treasuryBalance);
+    }
+
+    function withdrawTreasury(uint256 amount) external onlyCupid nonReentrant {
+        if (amount > treasuryBalance) amount = treasuryBalance;
+        if (amount == 0) return;
+        treasuryBalance -= amount;
+        (bool ok,) = payable(cupidTreasury).call{value: amount}("");
+        if (!ok) revert AffinityErr_WithdrawFailed();
+    }
+
+    function setPaused(bool _paused) external onlyCupid {
+        if (_paused) _pause(); else _unpause();
+        emit GuardianPauseToggled(paused());
+    }
+
+    function getProfile(address user) external view returns (
+        bytes32 profileHash,
+        uint8 preferenceFlags,
+        uint256 registeredAtBlock,
+        bool exists
+    ) {
