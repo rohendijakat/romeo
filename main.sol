@@ -320,3 +320,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
         uint256 registeredAtBlock,
         bool exists
     ) {
+        RomanceProfile storage p = _profiles[user];
+        return (p.profileHash, p.preferenceFlags, p.registeredAtBlock, p.exists);
+    }
+
+    function getAffinityScore(address seeker, address target) external view returns (uint256) {
+        return _computeAffinity(seeker, target);
+    }
+
+    function getProposalRecord(uint256 index) external view returns (
+        address fromAddr,
+        address toAddr,
+        uint256 affinityScore,
+        uint256 proposedAtBlock,
+        bytes32 proposalNonce
+    ) {
+        if (index >= _proposalHistory.length) revert AffinityErr_CapReached();
+        ProposalRecord storage r = _proposalHistory[index];
+        return (r.fromAddr, r.toAddr, r.affinityScore, r.proposedAtBlock, r.proposalNonce);
+    }
+
+    function proposalCount() external view returns (uint256) {
+        return _proposalHistory.length;
+    }
