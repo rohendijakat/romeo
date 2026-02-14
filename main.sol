@@ -366,3 +366,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
     }
 
     function recordMutualSpark(address partyA, address partyB) external onlyCupid whenNotPaused {
+        if (partyA == address(0) || partyB == address(0)) revert AffinityErr_ZeroAddress();
+        uint256 combined = sparkBalance[partyA] + sparkBalance[partyB];
+        emit MutualSpark(partyA, partyB, combined, block.number);
+    }
+
+    function getPreferenceLabel(uint8 flagIndex) external pure returns (string memory) {
+        if (flagIndex >= PREFERENCE_FLAG_COUNT) return "";
+        string[8] memory labels = [
+            "Adventure",
+            "Romance",
+            "Stability",
+            "Creativity",
+            "Humour",
+            "Ambition",
+            "Kindness",
+            "Mystery"
+        ];
+        return labels[flagIndex];
+    }
+
+    function getAffinityTier(uint256 score) external pure returns (string memory) {
+        if (score >= 900000) return "Soulmate";
+        if (score >= 700000) return "TrueMatch";
