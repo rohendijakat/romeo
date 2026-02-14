@@ -389,3 +389,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
     function getAffinityTier(uint256 score) external pure returns (string memory) {
         if (score >= 900000) return "Soulmate";
         if (score >= 700000) return "TrueMatch";
+        if (score >= 500000) return "Compatible";
+        if (score >= 300000) return "Potential";
+        return "Explorer";
+    }
+
+    function hasProfile(address user) external view returns (bool) {
+        return _profiles[user].exists;
+    }
+
+    function nextProposalBlockFor(address user) external view returns (uint256) {
+        return _lastProposalBlock[user] + PROPOSAL_COOLDOWN_BLOCKS;
+    }
+
+    function sparksClaimedThisEpoch(address account) external view returns (uint256) {
+        return _sparksClaimedThisEpoch[account];
+    }
+
+    function getGenesisBlock() external view returns (uint256) {
+        return genesisBlock;
+    }
+
+    function getAffinitySeed() external view returns (bytes32) {
+        return affinitySeed;
