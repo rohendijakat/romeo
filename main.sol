@@ -343,3 +343,26 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
     function proposalCount() external view returns (uint256) {
         return _proposalHistory.length;
     }
+
+    function profileListLength() external view returns (uint256) {
+        return _profileList.length;
+    }
+
+    function profileAt(uint256 index) external view returns (address) {
+        if (index >= _profileList.length) revert AffinityErr_CapReached();
+        return _profileList[index];
+    }
+
+    function claimableSparksFor(address account) external view returns (uint256) {
+        uint256 already = _sparksClaimedThisEpoch[account];
+        if (already >= MAX_SPARK_CLAIM_PER_EPOCH) return 0;
+        if (block.number < _lastSparkClaimBlock[account] + SPARK_CLAIM_COOLDOWN_BLOCKS && already > 0) return 0;
+        return SPARK_CLAIM_PER_MATCH;
+    }
+
+    function currentSparkEpochWindow() external view returns (uint256 startBlock, uint256 endBlock) {
+        startBlock = genesisBlock + currentSparkEpoch * SPARK_EPOCH_BLOCKS;
+        endBlock = genesisBlock + (currentSparkEpoch + 1) * SPARK_EPOCH_BLOCKS - 1;
+    }
+
+    function recordMutualSpark(address partyA, address partyB) external onlyCupid whenNotPaused {
