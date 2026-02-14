@@ -412,3 +412,13 @@ contract Romeo_bot is ReentrancyGuard, Pausable {
 
     function getAffinitySeed() external view returns (bytes32) {
         return affinitySeed;
+    }
+
+    function getCupidGuardian() external view returns (address) {
+        return cupidGuardian;
+    }
+
+    function getCupidTreasury() external view returns (address) {
+        return cupidTreasury;
+    }
+}
